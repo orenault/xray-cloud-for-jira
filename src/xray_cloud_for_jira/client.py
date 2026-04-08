@@ -1,3 +1,7 @@
+#
+#  (c)  Olivier RENAULT  2026
+#
+
 from __future__ import annotations
 
 import os
