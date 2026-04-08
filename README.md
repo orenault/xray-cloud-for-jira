@@ -129,7 +129,7 @@ result = client.graphql(query, {"issueId": "66925"})
 One of the most important features of this package is the automatic resolution from a Jira key such as:
 
 ```text
-HHELIA-6
+DEMO-6
 ```
 
 to the Xray internal issue ID required by GraphQL operations.
