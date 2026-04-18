@@ -438,16 +438,21 @@ class XrayCloudClient:
         content_type: str,
         error_label: str,
         params: Optional[Dict[str, Any]] = None,
+        **kwargs
     ) -> Any:
         if not file_path or not os.path.isfile(file_path):
             raise FileNotFoundError(f"{error_label} file not found: {file_path}")
 
         url = f"{self.base_url}/{endpoint.lstrip('/')}"
+
         headers = {
             "Authorization": f"Bearer {self.token}",
             "Content-Type": content_type,
             "Accept": "application/json",
         }
+
+        final_params = params.copy() if params else {}
+        final_params.update(kwargs)
 
         with open(file_path, "rb") as f:
             payload = f.read()
@@ -455,7 +460,7 @@ class XrayCloudClient:
         response = requests.post(
             url,
             headers=headers,
-            params=params or None,
+            params=final_params or None,
             data=payload,
             timeout=self.timeout,
             verify=self.verify_ssl,
@@ -476,34 +481,60 @@ class XrayCloudClient:
         except Exception:
             return response.text
 
-    def import_robot_results(self, file_path: str, project_key: Optional[str] = None) -> Any:
-        params: Dict[str, Any] = {}
-        if project_key:
-            params["projectKey"] = project_key
-
+    def import_robot_results(self, file_path: str, **kwargs) -> Any:
         return self._import_execution_results(
             file_path=file_path,
             endpoint="/api/v2/import/execution/robot",
             content_type="text/xml",
             error_label="Robot",
-            params=params,
+            **kwargs,
         )
 
-    def import_junit_results(self, file_path: str) -> Any:
-        return self._import_execution_results(
-            file_path=file_path,
-            endpoint="/api/v2/import/execution/junit",
-            content_type="text/xml",
-            error_label="JUnit",
-        )
-
-    def import_cucumber_results(self, file_path: str) -> Any:
+    def import_cucumber_results(self, file_path: str, **kwargs) -> Any:
         return self._import_execution_results(
             file_path=file_path,
             endpoint="/api/v2/import/execution/cucumber",
             content_type="application/json",
             error_label="Cucumber",
+            **kwargs,
         )
+
+    def import_junit_results(self, file_path: str, **kwargs) -> Any:
+        return self._import_execution_results(
+            file_path=file_path,
+            endpoint="/api/v2/import/execution/junit",
+            content_type="text/xml",
+            error_label="JUnit",
+            **kwargs,
+        )
+
+    def import_nunit_results(self, file_path: str, **kwargs) -> Any:
+        return self._import_execution_results(
+            file_path=file_path,
+            endpoint="/api/v2/import/execution/nunit",
+            content_type="text/xml",
+            error_label="NUnit",
+            **kwargs,
+        )
+
+    def import_xunit_results(self, file_path: str, **kwargs) -> Any:
+        return self._import_execution_results(
+            file_path=file_path,
+            endpoint="/api/v2/import/execution/xunit",
+            content_type="text/xml",
+            error_label="xUnit",
+            **kwargs,
+        )
+
+    def import_testng_results(self, file_path: str, **kwargs) -> Any:
+        return self._import_execution_results(
+            file_path=file_path,
+            endpoint="/api/v2/import/execution/testng",
+            content_type="text/xml",
+            error_label="TestNG",
+            **kwargs,
+        )
+
 
     def add_evidence_to_test_run(self, run_id: Any, file_path: str) -> Any:
         with open(file_path, "rb") as fh:
